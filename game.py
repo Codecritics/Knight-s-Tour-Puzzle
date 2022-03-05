@@ -1,15 +1,15 @@
 class Grid:
 
-    def __init__(self, col, row):
+    def __init__(self, col: int, row: int) -> None:
         self.ROW = row
         self.COL = col
         self.placeholder = len(str(row * col))
-
+        self.knight_position = (0, 0)
         self.BOARD_BORDER_LEN = self.COL * (self.placeholder + 1) + 3
         self.board = [[self.placeholder * "_" for _ in range(self.COL)] for _ in range(self.ROW)]
 
-    def __str__(self):
-        print_string = ""
+    def __str__(self) -> str:
+        print_string = "\nHere are the possible moves:\n"
         print_string += f'{"  " if self.ROW >= 10 else " "}{"-" * self.BOARD_BORDER_LEN}\n'
         for i in range(len(self.board)):
             print_string += f'{" " if len(self.board) - i < 10 <= self.COL else ""}{len(self.board) - i}| ' + " ".join(
@@ -20,13 +20,31 @@ class Grid:
                             [(self.placeholder - len(str(i + 1))) * " " + str(i + 1) for i in range(self.COL)]) + '  '
         return print_string
 
-    def set_knight_starting_position(self, x, y):
+    def write_on_board(self, x: int, y: int, symbol: str) -> None:
         tmp = list(self.board[x][y])
-        tmp[-1] = "X"
+        tmp[-1] = symbol
         self.board[x][y] = "".join(tmp).replace("_", " ")
+        self.knight_position = (x, y)
+
+    def set_knight_possible_moves(self) -> None:
+        x, y = self.knight_position
+
+        move_left_up = (x + 2, y + 1)
+        move_left_down = (x + 2, y - 1)
+        move_up_left = (x + 1, y - 2)
+        move_up_right = (x - 1, y - 2)
+        move_right_up = (x - 2, y + 1)
+        move_right_down = (x - 2, y - 1)
+        move_down_left = (x + 1, y + 2)
+        move_down_right = (x - 1, y + 2)
+        possibilities = [move_left_up, move_left_down, move_up_left, move_up_right, move_right_up, move_right_down,
+                         move_down_left, move_down_right]
+        for x_possibility, y_possibility in possibilities:
+            if 1 <= abs(x_possibility) <= self.ROW and 0 <= y_possibility < self.COL:
+                self.write_on_board(x_possibility, y_possibility, "O")
 
 
-def setup_grid():
+def setup_grid() -> (int, int):
     invalid_dimension_msg = "Invalid dimensions!"
 
     while True:
@@ -63,5 +81,6 @@ if __name__ == '__main__':
             knight_col -= 1
             break
 
-    grid.set_knight_starting_position(knight_row, knight_col)
+    grid.write_on_board(knight_row, knight_col, "X")
+    grid.set_knight_possible_moves()
     print(grid)
