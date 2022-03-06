@@ -27,21 +27,43 @@ class Grid:
         self.knight_position = (x, y)
 
     def set_knight_possible_moves(self) -> None:
-        x, y = self.knight_position
+        row, col = self.knight_position
 
-        move_left_up = (x + 2, y + 1)
-        move_left_down = (x + 2, y - 1)
-        move_up_left = (x + 1, y - 2)
-        move_up_right = (x - 1, y - 2)
-        move_right_up = (x - 2, y + 1)
-        move_right_down = (x - 2, y - 1)
-        move_down_left = (x + 1, y + 2)
-        move_down_right = (x - 1, y + 2)
+        move_left_up = (row - 1, col - 2)
+        move_left_down = (row + 1, col - 2)
+        move_up_left = (row - 2, col - 1)
+        move_up_right = (row - 2, col + 1)
+        move_right_up = (row - 1, col + 2)
+        move_right_down = (row + 1, col + 2)
+        move_down_left = (row + 2, col - 1)
+        move_down_right = (row + 2, col + 1)
+
+        print(self.warnsdorff_rule(row - 1, col - 2))
+
         possibilities = [move_left_up, move_left_down, move_up_left, move_up_right, move_right_up, move_right_down,
                          move_down_left, move_down_right]
-        for x_possibility, y_possibility in possibilities:
-            if 1 <= abs(x_possibility) <= self.ROW and 0 <= y_possibility < self.COL:
-                self.write_on_board(x_possibility, y_possibility, "O")
+        for row_possibility, col_possibility in possibilities:
+            if 1 <= abs(row_possibility) <= self.ROW and 0 <= col_possibility < self.COL:
+                self.write_on_board(row_possibility, col_possibility,
+                                    str(self.warnsdorff_rule(row_possibility, col_possibility)))
+
+    def warnsdorff_rule(self, row, col):
+        counter = -1
+        move_left_up = (row - 1, col - 2)
+        move_left_down = (row + 1, col - 2)
+        move_up_left = (row - 2, col - 1)
+        move_up_right = (row - 2, col + 1)
+        move_right_up = (row - 1, col + 2)
+        move_right_down = (row + 1, col + 2)
+        move_down_left = (row + 2, col - 1)
+        move_down_right = (row + 2, col + 1)
+        possibilities = [move_left_up, move_left_down, move_up_left, move_up_right, move_right_up, move_right_down,
+                         move_down_left, move_down_right]
+        for row_possibility, col_possibility in possibilities:
+            if (-self.ROW <= row_possibility < 0) and 0 <= col_possibility < self.COL:
+                counter += 1
+
+        return counter
 
 
 def setup_grid() -> (int, int):
