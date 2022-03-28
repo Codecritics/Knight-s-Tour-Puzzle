@@ -1,134 +1,230 @@
-from collections import defaultdict
+def draw_board(board): #draw actual board state with formatting - not used in later stages
 
+    dash_bar()
+    for i in range(b):
+        print("".join([str(b - i).rjust(cell - 1), "|"]), " ".join(
+            [str(board[i][j]).rjust(len(str(a * b)), "_") if board[i][j] == "_" else str(board[i][j]).rjust(len(str(a * b)), " ")
+             for j in range(a)]), "|")
+    dash_bar()
+    print(" " * (len(str(a)) + 1), " ".join([(str(r + 1).rjust(cell)) for r in range(a)]))
 
-class Knight:
-    possible_positions = set()
+def check_moves(): #marks available moves on the board
 
-    def __init__(self, row, col):
-        self.moves = [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [-1, 2], [1, -2], [-1, -2]]
-
-        self.position = (row, col)
-
-    def get_possible_moves(self, board: list) -> dict:
-        possible_moves = defaultdict(int)
-        row, col = self.position
-        nb_rows = len(board)
-        nb_cols = len(board[0])
-        for move_row, move_col in self.moves:
-            new_move_row, new_move_col = move_row + row, move_col + col
-            if (-nb_rows <= new_move_row < 0) and (0 <= new_move_col < nb_cols):
-                for row_, col_ in self.moves:
-                    if (-nb_rows <= new_move_row + row_ < 0) and (0 <= new_move_col + col_ < nb_cols) and "*" not in \
-                            board[new_move_row + row_][new_move_col + col_]:
-                        possible_moves[(new_move_row, new_move_col)] = possible_moves[(new_move_row, new_move_col)] + 1
-
-                    else:
-                        possible_moves[(new_move_row, new_move_col)] = possible_moves[(new_move_row, new_move_col)]
-        return possible_moves
-
-
-class Grid:
-    def __init__(self, col: int, row: int) -> None:
-        self.ROW = row
-        self.COL = col
-        self.placeholder = len(str(row * col))
-        self.BOARD_BORDER_LEN = self.COL * (self.placeholder + 1) + 3
-        self.board = [[self.placeholder * "_" for _ in range(self.COL)] for _ in range(self.ROW)]
-
-    def __str__(self) -> str:
-        print_string = f'{"  " if self.ROW >= 10 else " "}{"-" * self.BOARD_BORDER_LEN}\n'
-        for i in range(len(self.board)):
-            print_string += f'{" " if len(self.board) - i < 10 <= self.COL else ""}{len(self.board) - i}| ' + " ".join(
-                self.board[i]) + ' |\n'
-        print_string += f' {"-" * self.BOARD_BORDER_LEN}\n'
-        print_string += f'{" " if len(self.board) - 1 < 10 <= self.COL else ""}{"  " if self.COL < 10 else "  "} ' + \
-                        " ".join(
-                            [(self.placeholder - len(str(i + 1))) * " " + str(i + 1) for i in range(self.COL)]) + '  '
-        return print_string
-
-    def write_on_board(self, x: int, y: int, symbol: str) -> None:
-        tmp = list(self.board[x][y])
-        tmp[-1] = symbol
-        self.board[x][y] = "".join(tmp).replace("_", " ") if "*" not in self.board[x][y] else self.board[x][y]
-
-    def reset_board(self):
-        for i in range(len(self.board)):
-            for j in range(len(self.board[i])):
-                if self.board[i][j].strip().isdigit():
-                    self.board[i][j] = self.placeholder * "_"
-
-
-def setup_grid() -> (int, int):
-    invalid_dimension_msg = "Invalid dimensions!"
-
-    while True:
-        try:
-            col, row = input("Enter your board dimensions:").split(" ")
-            assert (col is not None and row is not None)
-            assert (row.isdigit() and col.isdigit())
-            assert (len(row) <= 2 and len(col) <= 2)
-            assert (1 <= int(row) and 1 <= int(col))
-        except Exception:
-            print(invalid_dimension_msg)
+    count = 0
+    moves = [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]]  #movement vectors  [x, y]
+    for i in range(8):
+        #for j in range(2):
+        if y + moves[i][0] > b or y + moves[i][0] < 0 or x + moves[i][1] > a or x + moves[i][1] < 0:
+            continue
         else:
-            break
-    return int(row), int(col)
+            try:
+                if board[y + moves[i][0]][x + moves[i][1]] == "_":
+                    board[y + moves[i][0]][x + moves[i][1]] = str(count_moves(y + moves[i][0], x + moves[i][1]))
+                    count += 1
+                    print(f"ok  {moves[i]}")
 
+            except:
+                continue
 
-def move_knight(input_msg: str) -> bool:
-    global VISIT
-    invalid_position_msg = "Invalid position!" if input_msg == start_msg else "Invalid move!"
+    dash_bar()
+    for i in range(b):
+        print("".join([str(b - i).rjust(cell - 1), "|"]), " ".join([str(board[i][j]).rjust(len(str(a * b)), "_") if board[i][j] == "_" else str(board[i][j]).rjust(len(str(a * b)), " ")  for j in range(a)]), "|")
+    dash_bar()
+    print(" " * (len(str(a))), " ".join([(str(r).rjust(cell)) for r in range(a)]))
 
-    while True:
-        try:
-            k_col, k_row = input(input_msg).split(" ")
-            assert (k_col is not None and k_row is not None)
-            assert (k_row.isdigit() and k_col.isdigit())
-            assert (len(k_row) <= 2 and len(k_col) <= 2)
-            k_row, k_col = int(k_row), int(k_col)
-            assert (1 <= k_row <= grid.ROW and 1 <= k_col <= grid.COL)
-            if Knight.possible_positions and input_msg == next_move_msg:
-                assert ((k_col, k_row) in Knight.possible_positions)
-        except Exception:
-            print(invalid_position_msg)
+    return count
+
+def count_moves(y, x): #subfunciton for check_moves(), counts available moves from tiles determined in master function
+    moves = [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]]
+    count = 0
+    #print("x:",x , "y:", y)
+    for i in range(8):
+        #for j in range(2):
+        if y + moves[i][0] > b or y + moves[i][0] < 0 or x + moves[i][1] > a or x + moves[i][1] < 0:
+            continue
         else:
-            k_row *= -1
-            k_col -= 1
-            break
-    knight = Knight(k_row, k_col)
-    VISIT += 1
-    grid.write_on_board(k_row, k_col, "X")
-    knight.possible_positions.clear()
+            try:
+                if board[y + moves[i][0]][x + moves[i][1]] == "_":
+                    count += 1
+            except:
+                continue
+    return count
 
-    knight_moves = knight.get_possible_moves(grid.board)
-    for row, col in knight_moves:
-        if knight_moves[(row, col)] >= 0:
-            grid.write_on_board(row, col, symbol=str(knight_moves[(row, col)] - 1))
-            if "*" not in grid.board[row][col]:
-                Knight.possible_positions.add((col + 1, row * -1))
-    print(grid)
-    grid.write_on_board(k_row, k_col, "*")
-    grid.reset_board()
-    print()
+def dash_bar(): #draw top and bottom --- line
+    print(" " * (cell - 1), "-" * ((len(str(a * b)) + 1) * a), "---", sep="")
 
-    return len(Knight.possible_positions) == 0
+def ask_board(): #ask user for board dimensions
+    while True:
+        dim = input("Enter your board dimensions: ")
+        try:
+            a, b = dim.split(" ", 1)
+        except ValueError:
+            print(invalid_dim)
+            continue
 
+        if a.isnumeric() == False or b.isnumeric() == False:
+            print(invalid_dim)
+            continue
+        elif len(dim.split(" ")) != 2:
+            print(invalid_dim)
+            continue
+        elif int(a) < 1 or int(b) < 1:
+            print(invalid_dim)
+            continue
+        else:
+            return int(a), int(b)
 
-if __name__ == '__main__':
-
-    grid_col, grid_row = setup_grid()
-    grid = Grid(grid_row, grid_col)
-    start_msg = "Enter the knight's starting position:"
-    VISIT = 0
-    move_knight(start_msg)
-
-    next_move_msg = "Enter your next move:"
+def ask_pos(): #ask user about knight's starting position
 
     while True:
-        if move_knight(next_move_msg):
-            if VISIT < grid_col * grid_row:
-                print("No more possible moves!")
-                print(f"Your knight visited {VISIT} squares!")
+        pos = input("Enter the knight's starting position: ")
+        try:
+            x, y = pos.split(" ", 1)
+        except ValueError:
+            print(invalid_pos)
+            continue
+
+        if x.isnumeric() == False or y.isnumeric() == False:
+            print(invalid_pos, "num")
+            continue
+        elif len(pos.split(" ")) != 2:
+            print(invalid_pos, "split err")
+            continue
+        elif int(x) not in range(1, a + 1) or int(y) not in range(1, b + 1):
+            print(invalid_pos, "range 1 - b")
+            continue
+        else:
+            return int(x) - 1, b - int(y)
+
+def ask_move(): #ask user about knight's next move
+
+    moves = [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]]
+    pos = input("Enter your next move: ")
+    while True:
+
+        try:
+            x_move, y_move = pos.split(" ", 1)
+        except ValueError:
+            print(invalid_pos)
+            continue
+
+        if x_move.isnumeric() == False or y_move.isnumeric() == False:
+            print(invalid_pos, "num")
+            pos = input("Invalid move! Enter your next move: ")
+            continue
+        elif len(pos.split(" ")) != 2:
+            print(invalid_pos, "split err")
+            pos = input("Invalid move! Enter your next move: ")
+            continue
+        elif int(x_move) not in range(1, a + 1) or int(y_move) not in range(1, b + 1):
+            print(invalid_pos, "range 1 - b")
+            pos = input("Invalid move! Enter your next move: ")
+            continue
+        else:
+            x_move, y_move = int(x_move) - 1, b - int(y_move)
+            for i in range(8):
+                if y + moves[i][0] == y_move and x + moves[i][1] == x_move and y + moves[i][0] <= b and y + moves[i][0] >= 0 and x + moves[i][1] <= a and x + moves[i][1] >= 0 and board[y_move][x_move] != "X":
+                    board[y_move][x_move] = "X"
+                    print()
+                    board[y][x] = "*"
+                    return x_move, y_move
+
+        pos = input("Invalid move! Enter your next move: ")
+
+def solve():
+    auto_board = [[-1 for i in range(a)] for j in range(b)]
+
+    #first tile starts at #1
+    auto_board[y][x] = 1
+    moves = [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]]  #movement vectors table [y, x]
+
+    #next tile is #2
+    steps = 2
+
+    #checking if solution exists or not
+    if (not next_move(auto_board, x, y, moves, steps)):
+        print("No solution exists!")
+        return False
+    else:
+        if choice == "n":
+            print("Here's the solution!")
+            draw_board(auto_board)
+
+def next_move(board, x, y, moves, steps): #checking if valid route exists and passing it if it does
+    if (steps == int(a) * int(b) + 1):
+        return True
+
+
+    for i in range(8):
+        new_x = x + moves[i][1]
+        new_y = y + moves[i][0]
+        if y + moves[i][0] < b and y + moves[i][0] >= 0 and x + moves[i][1] < a and x + moves[i][1] >= 0 and board[new_y][new_x] == -1:
+            board[new_y][new_x] = steps
+
+            if (next_move(board, new_x, new_y, moves, steps + 1)):
+                return True
+
+            #backtracking
+            board[new_y][new_x] = -1
+    return False
+
+def board_clean():
+    for i in range(b):
+        for j in range(a):
+            if board[i][j] in ["0", "1", "2", "3", "4", "5", "6", "7", "8"]:
+                board[i][j] = "_"
+
+def start():
+    answer = input("Do you want to try the puzzle? (y/n): ")
+    while answer != "y" and answer != "n":
+        if answer != "y" and answer != "n":
+            print(invalid_input)
+        answer = input("Do you want to try the puzzle? (y/n): ")
+    return answer
+
+#starting setup
+
+#errors
+invalid_dim = "Invalid dimensions!"
+invalid_pos = "Invalid position!"
+no_solution = "No solution exists!"
+invalid_input = "Invalid input!"
+
+#getting board dimensions and knight's starting position
+
+a, b = ask_board()
+
+x, y = ask_pos()
+cell = len(str(b)) + 1  # calculates cell width for drawing board
+
+squares = 1
+available_moves = 0
+
+choice = start()
+
+board = [["_" for _ in range(a)] for _ in range(b)]
+
+if choice == "y": #manual gameplay
+    board[y][x] = "X"
+
+    if solve() == False:
+        pass
+    else:
+        while True:
+            board_clean()
+            available_moves = check_moves()
+            print(f"squares: {squares}")
+            if available_moves == 0:
+                if squares == a * b:
+                    print("What a great tour! Congratulations!")
+                    break
+                else:
+                    print("No more possible moves!")
+                    print(f"Your knight visited {squares} squares!")
+                    break
             else:
-                print("What a great tour! Congratulations!")
-            break
+                squares += 1
+            x, y = ask_move()
+else: #automated solution
+    solve()
+
